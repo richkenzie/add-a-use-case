@@ -75,7 +75,7 @@ classDiagram
   - UC-STU-reactivate-student will reuse it.
 - **`security/ActiveAccountJwtAuthenticationConverter.java`:**
   - **new**: wraps the existing `JwtAuthenticationConverter` (the authorities claim, no prefix).
-  - Loads `UserRepository.findById(userId claim)`.
+  - Asks `UserRepository.existsByIdAndEnabledTrue(userId claim)`: a primary-key check that loads no entity, because `findById` on a student would also fetch her course section and team on every request.
   - Throws `DisabledException` when the user is missing or not enabled, and also when the `userId` claim is absent or not a number (fail closed: `401`).
   - `SecurityConfiguration` registers it as the resource server's JWT converter. See *Key decisions*.
 - **`security/SecurityConfiguration.java`:**
@@ -160,8 +160,8 @@ sequenceDiagram
     St->>RS: any request, Authorization: Bearer (issued before deactivation)
     RS->>RS: verify signature and expiry (unchanged)
     RS->>CV: convert(jwt)
-    CV->>U: findById(userId claim)
-    U-->>CV: enabled = false (or no such user)
+    CV->>U: existsByIdAndEnabledTrue(userId claim)
+    U-->>CV: false (deactivated, or no such user)
     CV-->>RS: DisabledException
     RS->>EP: commence
     EP-->>St: 401, "User account is abnormal." (ExceptionHandlerAdvice, AccountStatusException)

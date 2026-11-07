@@ -16,4 +16,11 @@ public interface UserRepository extends JpaRepository<PeerEvaluationUser, Intege
 
     List<PeerEvaluationUser> findByEmailIn(Collection<String> emails);
 
+    /**
+     * Whether the account exists and is active. Read on every authenticated request
+     * ({@code ActiveAccountJwtAuthenticationConverter}), so it selects by primary key and loads no entity:
+     * {@code findById} on a student would also fetch her course section and team.
+     */
+    boolean existsByIdAndEnabledTrue(Integer id);
+
 }

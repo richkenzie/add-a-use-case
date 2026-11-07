@@ -5,6 +5,7 @@ import type {
   SearchStudentByCriteriaResponse,
   CreateStudentResponse,
   DeleteStudentResponse,
+  DeactivateStudentResponse,
   FindStudentByIdResponse,
   UpdateStudentResponse,
   Student,
@@ -36,6 +37,10 @@ export const updateStudent = (updatedStudent: Student) =>
     `${API.STUDENTS_ENDPOINT}/${updatedStudent.id}`,
     updatedStudent
   )
+
+// UC-STU-deactivate-student: the instructor of the student's course section or the course admin of its course
+export const deactivateStudent = (id: number) =>
+  request.patch<any, DeactivateStudentResponse>(`${API.STUDENTS_ENDPOINT}/${id}/deactivate`)
 
 export const deleteStudent = (id: number) =>
   request.delete<any, DeleteStudentResponse>(`${API.STUDENTS_ENDPOINT}/${id}`)
