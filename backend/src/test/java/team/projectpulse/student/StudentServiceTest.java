@@ -173,8 +173,9 @@ class StudentServiceTest {
         assertThat(result.getFirstName()).isEqualTo(update.getFirstName());
         assertThat(result.getLastName()).isEqualTo(update.getLastName());
         assertThat(result.getEmail()).isEqualTo(update.getEmail());
-//        assertThat(result.getRoles()).isEqualTo(update.getRoles());
-        assertThat(result.isEnabled()).isEqualTo(update.isEnabled());
+        // The generic edit ignores enabled, even from an instructor: deactivation has its own endpoint
+        assertThat(update.isEnabled()).isFalse();
+        assertThat(result.isEnabled()).isTrue();
     }
 
     @Test
