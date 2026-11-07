@@ -1526,6 +1526,10 @@ Details:
 
 **Associated Information:**
 - The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
+- Team membership: deactivation never removed the student from her team (BR-student-lifecycle), so reactivation restores her membership as it was.
+- Until this use case is built, there is no user-interface path to reactivate a student; the former generic status switch on the student edit form was removed when UC-STU-deactivate-student was designed.
+- Peer evaluations: after reactivation, her teammates resume evaluating her for the weeks that follow (BR-deactivated-student-evaluations).
+- Open design point: the weekly peer evaluation report rule in BR-deactivated-student-evaluations keys on her *current* status, so once she is reactivated she would appear with empty rows for the weeks she was deactivated. The design of this use case must decide how to handle that.
 
 **Related Use Cases:** UC-STU-delete-student: Delete a student; UC-STU-deactivate-student: Deactivate a student
 **Assumptions:**
