@@ -1475,6 +1475,8 @@ Details:
 **Extensions:**
 - **5a. The course admin or instructor cancels the deactivation:**
   - 5a1. The system leaves the student unchanged and the use case ends.
+- **6a. The student is already deactivated (for example, another course admin or instructor deactivated her first):**
+  - 6a1. The system informs the course admin or instructor that this student is already deactivated, leaves the student unchanged, and the use case ends.
 
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
