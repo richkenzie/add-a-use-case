@@ -2,7 +2,11 @@ package team.projectpulse.student;
 
 import tools.jackson.databind.json.JsonMapper;
 import team.projectpulse.AbstractIntegrationTest;
+import team.projectpulse.instructor.Instructor;
+import team.projectpulse.section.Section;
+import team.projectpulse.section.SectionRepository;
 import team.projectpulse.system.StatusCode;
+import team.projectpulse.user.UserRepository;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +39,12 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     JsonMapper jsonMapper;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    SectionRepository sectionRepository;
 
     String adminToken;
 
@@ -123,6 +133,34 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
                 .andExpect(jsonPath("$.message").value("No permission."))
                 .andExpect(jsonPath("$.data").value("Access Denied"));
+    }
+
+    /**
+     * Makes Tim Cook, course admin of the EE capstone course, no longer an instructor of its only course section,
+     * and returns the id of Jana Norton, a student of that course section. The seed data assigns every course
+     * admin to all of her course's course sections, so this is the only way to reach the case BR-student-lifecycle
+     * names: the course admin of the student's course who is not assigned to her course section.
+     */
+    private int unassignAdminTimFromJanasSection() {
+        Student jana = (Student) this.userRepository.findByEmail("j.norton@abc.edu").orElseThrow();
+        Instructor tim = (Instructor) this.userRepository.findByEmail("t.cook@abc.edu").orElseThrow();
+        Section section = jana.getSection();
+        section.removeInstructor(tim);
+        this.sectionRepository.saveAndFlush(section);
+        return jana.getId();
+    }
+
+    @Test
+    @DisplayName("UC-STU-deactivate-student step 2: the course admin of the student's course opens her even when not assigned to her course section")
+    void testCourseAdminNotAssignedToSectionFindsStudentInfoById() throws Exception {
+        // Given
+        int janaId = unassignAdminTimFromJanasSection();
+
+        // When and then
+        this.mockMvc.perform(get(this.baseUrl + "/students/" + janaId).accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.adminTimToken))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.data.id").value(janaId));
     }
 
     @Test
