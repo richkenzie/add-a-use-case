@@ -1478,7 +1478,7 @@ Details:
 - **6a. The student is already deactivated (for example, another course admin or instructor deactivated her first):**
   - 6a1. The system informs the course admin or instructor that this student is already deactivated, leaves the student unchanged, and the use case ends.
 - **6b. The student no longer exists (for example, a course admin deleted her after step 2):**
-  - 6b1. The system refuses the deactivation, informs the course admin or instructor that this student cannot be deactivated, and the use case ends.
+  - 6b1. The system refuses the deactivation, and the use case ends.
 - **6c. The actor is neither a course admin of the student's course nor an instructor assigned to her course section (BR-student-lifecycle):**
   - 6c1. The system refuses the deactivation, leaves the student unchanged, and the use case ends.
 
