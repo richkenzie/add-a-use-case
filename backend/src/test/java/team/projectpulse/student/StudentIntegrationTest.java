@@ -486,6 +486,34 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("UC-STU-deactivate-student 6c: an instructor of another course section of the same course may not deactivate her")
+    void testInstructorOfAnotherSectionOfSameCourseDeactivatesStudent() throws Exception {
+        // Given: Bill Gates, a plain instructor (not the course admin), is unassigned from John's course section and
+        // still teaches another course section of the same course. The seed assigns him to both.
+        Student john = (Student) this.userRepository.findById(JOHN_ID).orElseThrow();
+        Instructor bill = (Instructor) this.userRepository.findByEmail("b.gates@abc.edu").orElseThrow();
+        Section johnsSection = john.getSection();
+        johnsSection.removeInstructor(bill);
+        this.sectionRepository.saveAndFlush(johnsSection);
+        assertThat(bill.getSections())
+                .isNotEmpty()
+                .allMatch(section -> section.getCourse().getCourseId().equals(johnsSection.getCourse().getCourseId()))
+                .noneMatch(section -> section.getSectionId().equals(johnsSection.getSectionId()));
+
+        // When and then
+        deactivate(JOHN_ID, this.instructorBillToken)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
+                .andExpect(jsonPath("$.message").value("No permission."));
+
+        // Nothing changed: read back by the course admin, since Bill may no longer open her
+        this.mockMvc.perform(get(this.baseUrl + "/students/" + JOHN_ID).accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.adminToken))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.data.enabled").value(true));
+    }
+
+    @Test
     @DisplayName("FR-SEC-active-account: the deactivated student's token stops working, and she cannot log in again")
     void testDeactivatedStudentIsLockedOut() throws Exception {
         // When
