@@ -343,7 +343,7 @@ A business rule (`BR-*`, owned by [business-rules.md](requirements/business-rule
 | `BR-authored-prevails` | `UC-AI-elicit-requirements` | — | — |
 | `BR-collab-no-overwrite` | `UC-COL-collaborative-edit` | `ROB-no-overwrite` | — |
 | `BR-comment-access` | `UC-COL-add-comment`, `UC-COL-resolve-comment` | — | — |
-| `BR-deactivated-student-evaluations` | `UC-STU-deactivate-student`, `UC-STU-reactivate-student` | — | — |
+| `BR-deactivated-student-evaluations` | `UC-EVA-submit-evaluation`, `UC-STU-deactivate-student`, `UC-STU-reactivate-student` | — | — |
 | `BR-deletion-integrity` | `UC-ART-delete-artifact`, `UC-GLO-delete-term` | `DI-artifact-key-assignment`, `DI-referential-integrity`, `DI-soft-delete-retention`, (prose) | — |
 | `BR-document-creation` | `UC-TPL-provision-documents` | — | — |
 | `BR-edit-lock-required` | `UC-COL-collaborative-edit`, `UC-DOC-edit-document`, `UC-DOC-edit-use-case` | `DI-concurrency-control`, (prose) | — |
