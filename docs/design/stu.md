@@ -221,15 +221,15 @@ No delta. `enabled` is an existing column of the user table (`PeerEvaluationUser
 
 | Use case, flow | Level | Asserts |
 |---|---|---|
-| UC-STU-deactivate main, service | unit (`StudentServiceTest`) | An active student is saved with `enabled = false` |
-| UC-STU-deactivate main, instructor | integration (`StudentIntegrationTest`) | The instructor of the student's course section gets `200`; `GET /students/{id}` then returns `enabled: false` |
-| UC-STU-deactivate main, course admin | integration | The course admin of the course, not assigned to the course section, gets `200` |
-| UC-STU-deactivate main, team kept | unit and integration | Her team is the same after deactivation, and she is still returned by `GET /students/teams/{teamId}` |
-| UC-STU-deactivate main, work retained | integration | Her weekly activity reports, and the peer evaluations she wrote and received, are still returned after deactivation |
-| UC-STU-deactivate 5a | manual (no frontend test harness for this page) | Cancel sends no request and the student stays active |
-| UC-STU-deactivate 6a | unit and integration | An already deactivated student: `409` with the 6a message; nothing saved |
-| UC-STU-deactivate 6b | integration | An id that names no student: `403` |
-| UC-STU-deactivate 6c | integration | The student herself, and an instructor of another course section: `403` |
+| UC-STU-deactivate-student main, service | unit (`StudentServiceTest`) | An active student is saved with `enabled = false` |
+| UC-STU-deactivate-student main, instructor | integration (`StudentIntegrationTest`) | The instructor of the student's course section gets `200`; `GET /students/{id}` then returns `enabled: false` |
+| UC-STU-deactivate-student main, course admin | integration | The course admin of the course, not assigned to the course section, gets `200` |
+| UC-STU-deactivate-student main, team kept | unit and integration | Her team is the same after deactivation, and she is still returned by `GET /students/teams/{teamId}` |
+| UC-STU-deactivate-student main, work retained | integration | Her weekly activity reports, and the peer evaluations she wrote and received, are still returned after deactivation |
+| UC-STU-deactivate-student 5a | manual (no frontend test harness for this page) | Cancel sends no request and the student stays active |
+| UC-STU-deactivate-student 6a | unit and integration | An already deactivated student: `409` with the 6a message; nothing saved |
+| UC-STU-deactivate-student 6b | integration | An id that names no student: `403` |
+| UC-STU-deactivate-student 6c | integration | The student herself, and an instructor of another course section: `403` |
 | FR-SEC-active-account, issued token | integration | A token obtained before deactivation gets `401` on its next request |
 | FR-SEC-active-account, login | integration | Logging in after deactivation is refused with `401` |
 | Generic edit ignores `enabled` | unit (update `testInstructorUpdatesStudent`) | Sending `enabled: false` through `updateStudent` leaves the student active |
