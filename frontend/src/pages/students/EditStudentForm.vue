@@ -13,14 +13,22 @@
     <el-form-item label="Username:" prop="username">
       <el-input v-model="studentBeingEdited.username"></el-input>
     </el-form-item>
-    <el-form-item label="Status:" prop="enabled">
-      <el-switch
-        v-model="studentBeingEdited.enabled"
-        inline-prompt
-        active-text="Enabled"
-        inactive-text="Disabled"
-        style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-      />
+    <el-form-item label="Status:">
+      <!-- Status is read-only here: it changes through UC-STU-deactivate-student, not through the edit. -->
+      <el-tag :type="studentBeingEdited.enabled ? 'success' : 'danger'" data-cy="student-status">
+        {{ studentBeingEdited.enabled ? 'Active' : 'Deactivated' }}
+      </el-tag>
+      <el-button
+        v-if="studentBeingEdited.enabled"
+        type="danger"
+        plain
+        size="small"
+        style="margin-left: 12px"
+        data-cy="deactivate-student"
+        @click="deactivateExistingStudent()"
+      >
+        Deactivate
+      </el-button>
     </el-form-item>
     <el-form-item label="First Name:" prop="firstName">
       <el-input v-model="studentBeingEdited.firstName"></el-input>
@@ -42,10 +50,11 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Student } from '@/apis/student/types'
 import type { FormInstance } from 'element-plus'
-import { findStudentById, updateStudent } from '@/apis/student'
+import axios from 'axios'
+import { deactivateStudent, findStudentById, updateStudent } from '@/apis/student'
 import { ref, onMounted } from 'vue'
 
 const { studentId } = defineProps(['studentId'])
@@ -74,7 +83,6 @@ const rules = {
       trigger: 'blur'
     }
   ],
-  enabled: [{ required: true, message: 'Please select the status of the user.', trigger: 'blur' }],
   firstName: [
     { required: true, message: 'Please provide the first name of the user.', trigger: 'blur' }
   ],
@@ -110,17 +118,48 @@ async function updateExistingStudent() {
   const updatedStudent: Student = {
     id: studentBeingEdited.value.id,
     username: studentBeingEdited.value.username,
-    enabled: studentBeingEdited.value.enabled,
     firstName: studentBeingEdited.value.firstName,
     lastName: studentBeingEdited.value.lastName,
     email: studentBeingEdited.value.email
   }
-  console.log(updatedStudent)
-  // Call the API to update the user
+  // Call the API to update the user. The status is not sent: the server ignores it on an edit.
   await updateStudent(updatedStudent)
 
   ElMessage.success('Student updated successfully')
   emit('close-dialog')
+}
+
+/**
+ * UC-STU-deactivate-student, steps 3 to 6. The confirmation states the consequences from the use case's
+ * Associated Information (step 4). Cancel (5a) sends nothing. Errors are toasted by the shared request
+ * interceptor, which also opens the Forbidden page on a 403 (6b, 6c), so nothing is shown twice here.
+ * After a success or a 409 (6a, already deactivated) the student is reloaded, so the status shows what the
+ * server now holds.
+ */
+async function deactivateExistingStudent() {
+  const { id, firstName, lastName } = studentBeingEdited.value
+  const fullName = `${firstName} ${lastName}`
+
+  try {
+    await ElMessageBox.confirm(
+      `${fullName} will no longer be able to log in or submit weekly activity reports and peer evaluations, ` +
+        'and teammates will no longer evaluate this student. The account, team membership, and all previously ' +
+        'submitted work are kept, and the account can be reactivated later. This is not a deletion. ' +
+        'Deactivate this student?',
+      'Warning',
+      { confirmButtonText: 'Deactivate', cancelButtonText: 'Cancel', type: 'warning' }
+    )
+  } catch {
+    return // 5a: cancelled, nothing sent
+  }
+
+  try {
+    await deactivateStudent(id as number)
+    ElMessage.success(`${fullName} has been deactivated.`)
+  } catch (error) {
+    if (!(axios.isAxiosError(error) && error.response?.status === 409)) return
+  }
+  await loadStudent(id as number)
 }
 </script>
 
